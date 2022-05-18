@@ -1,17 +1,14 @@
 import connectMongoDB from "../app/mongoDatabase.js"
 import dayjs from 'dayjs'
 
-export default async function createPool(req, res) {
+export async function createPool(req, res) {
     try {
         const { db } = await connectMongoDB()
         
         let pool = req.body
         if(!pool.expireAt){
-            console.log("CHEGUEI 1")
             const todayPlus30Days = dayjs().add(30,'day').format('YYYY-MM-DD HH:mm').toString()
-            console.log("CHEGUEI 1")
             pool = {...pool , expireAt: todayPlus30Days}
-            console.log("CHEGUEI 1")
         }
         
         await db.collection('pools').insertOne(pool)
@@ -23,3 +20,15 @@ export default async function createPool(req, res) {
 
 }
 
+export async function getPools(req, res) {
+    try{
+        const {db} = await connectMongoDB()
+
+        const pools = await db.collection('pools').find().toArray()
+
+        res.status(200).json({message: "list of pools found", pools, status: 200})
+
+     } catch (e) {
+         res.status(404).json({ message: "Error getting pools", status: 404 })
+    }
+}
