@@ -28,4 +28,30 @@ export default class ChoiceController {
             return res.status(400).json({ message: "Error during choice creation", error: e, status: 400 })
         }
     }
+
+    async vote(req, res) {
+        try {
+            const { db } = await connectMongoDB()
+            const choiceId = req.params.id
+            const now = dayjs().format('YYYY-MM-DD HH:mm')
+
+            const choice = await db.collection('choices').findOne({ _id: new ObjectId(choiceId) })
+            if (!choice) return res.status(404).json({ message: "Choice not found", status: 404 })
+
+            const poll = await db.collection('polls').findOne({ _id: new ObjectId(choice.pollId) })
+            if (!poll) {
+                console.log("Inconsistencia de dados, opção de escolha aponta para votação inexistente")
+                throw new Error("Inconsistencia de dados")
+            }
+
+            const expired = dayjs().isAfter(dayjs(poll.expireAt))
+            if (expired) return res.status(403).json({ message: "poll expired", status: 403 })
+
+            await db.collection("votes").insertOne({ createdAt: now, choiceId: new ObjectId(choiceId) })
+            return res.status(201).json({ message: "Vote created", status: 201 })
+
+        } catch (e) {
+            res.status(400).json({ message: "Error during vote", status: 400, error: e });
+        }
+    }
 }

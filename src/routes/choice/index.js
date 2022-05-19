@@ -5,6 +5,7 @@ import ChoiceController from "../../controllers/choiceController.js";
 const choiceRouter = Router()
 const choiceController = new ChoiceController()
 
-choiceRouter.post('/', validateChoiceCreation , choiceController.createChoiceOption)
+choiceRouter.post('/', validateChoiceCreation, choiceController.createChoiceOption)
+choiceRouter.post('/:id/vote', choiceController.vote)
 
 export default choiceRouter;
