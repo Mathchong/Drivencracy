@@ -1,8 +1,8 @@
-import express, {json} from 'express'
+import express, { json } from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 
-import router from './Routes/index.js'
+import router from './routes/index.js'
 
 dotenv.config()
 const app = express()
@@ -10,7 +10,9 @@ app.use(cors())
 app.use(json())
 app.use(router)
 
+app.listen(process.env.PORT, () => {
 
-app.listen(process.env.PORT, ()=>{
-    console.log("listening on 'http://localhost:5000' ")
+    if (process.env.MODE !== 'dev') return
+
+    console.log(`listening on 'http://localhost:${process.env.PORT}' `)
 })

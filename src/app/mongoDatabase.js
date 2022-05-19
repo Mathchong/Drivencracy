@@ -16,7 +16,7 @@ export default async function connectMongoDB() {
     }
 
     await client.connect();
-    
+
     const db = client.db(process.env.MONGO_DB);
     cachedDb = db;
 
