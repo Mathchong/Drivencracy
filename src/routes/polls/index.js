@@ -9,6 +9,7 @@ const pollController = new PollController();
 
 pollRouter.post('/', pollValidate, pollController.createpoll)
 pollRouter.get('/', pollController.getpolls)
+pollRouter.get('/:id/choice', pollController.getPollChoice)
 
 
 export default pollRouter;

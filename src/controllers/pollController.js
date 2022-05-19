@@ -33,4 +33,20 @@ export default class PollController {
             return res.status(404).json({ message: "Error getting polls", status: 404 })
         }
     }
+
+    async getPollChoice(req, res) {
+        try {
+            const { id } = req.params
+            console.log(`ID: ${id}`)
+            const { db } = await connectMongoDB()
+            console.log(`DB: ${db}`)
+            const choices = await db.collection('choices').find({ pollId: id }).toArray()
+            if (!choices) return res.status(404).json({ message: "Poll not found" })
+            console.log(`Choices: ${choices}`)
+
+            return res.status(200).json({ message: "Loaded Choices", choices, status: 200 })
+        } catch (e) {
+            res.status(400).json({ message: "Error getting Choices of poll", status: 404, error: e })
+        }
+    }
 }
