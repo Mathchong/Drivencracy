@@ -41,10 +41,6 @@ export default class ChoiceController {
             if (!choice) return res.status(404).json({ message: "Choice not found", status: 404 })
 
             const poll = await db.collection('polls').findOne({ _id: new ObjectId(choice.pollId) })
-            if (!poll) {
-                console.log("Inconsistencia de dados, opção de escolha aponta para votação inexistente")
-                throw new Error("Inconsistencia de dados")
-            }
 
             const expired = dayjs().isAfter(dayjs(poll.expireAt))
             if (expired) return res.status(403).json({ message: "poll expired", status: 403 })

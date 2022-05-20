@@ -1,5 +1,6 @@
 import connectMongoDB from "../app/mongoDatabase.js"
 import dayjs from 'dayjs'
+import { ObjectId } from "mongodb"
 
 export default class PollController {
 
@@ -57,12 +58,44 @@ export default class PollController {
             const pollId = req.params.id
             console.log(pollId)
 
-            const allChoices = await db.collection('choices').find({pollId: new ObjectId(pollId) }).toArray()
+            const allChoices = await db.collection('choices').find({ pollId: new ObjectId(pollId) }).toArray()
             console.log(allChoices)
-            return res.status(200).json({ message: allChoices })
+
+            const choicesIds = allChoices.map((choice) => choice._id)
+
+            const votes = await db.collection('votes').find({ choiceId: { $in: choicesIds } }).toArray()
+            let frequency = {}
+            let max = 0
+            let result
+
+            for(let vote in votes) {
+                frequency[votes[vote].choiceId] = (frequency[votes[vote].choiceId] || 0) + 1
+                console.log(`TESTE ${frequency[votes[vote].choiceId]}, ${vote}`)
+                if (frequency[votes[vote].choiceId] > max) {
+                    max = frequency[votes[vote].choiceId]
+                    result = votes[vote].choiceId
+                }
+            }
+            console.log(result)
+
+            const poll = await db.collection('polls').findOne({_id: new ObjectId(pollId)})
+            const choice = await db.collection('choices').findOne({_id: result})
+            console.log(choice)
+
+            const mostVotedChoice = {
+                _id: pollId,
+                title: poll.title,
+                expireAt: poll.expireAt,
+                result:{
+                    title: choice.title,
+                    votes: max
+                }
+            }
+
+            res.json({ message: "Votes Found", winner: mostVotedChoice, status: 200 })
 
         } catch (error) {
-            res.status(400).json({ error, allChoices })
+            res.status(400).json({ error })
         }
     }
 }
