@@ -52,13 +52,12 @@ export default class PollController {
     }
 
     async mostVotedChoice(req, res) {
-        let allChoices
         try {
             const { db } = await connectMongoDB()
             const pollId = req.params.id
             console.log(pollId)
 
-            allChoices = await db.collection('choices').find({pollId: new ObjectId(pollId) }).toArray()
+            const allChoices = await db.collection('choices').find({pollId: new ObjectId(pollId) }).toArray()
             console.log(allChoices)
             return res.status(200).json({ message: allChoices })
 
