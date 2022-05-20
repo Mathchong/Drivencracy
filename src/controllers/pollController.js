@@ -25,7 +25,7 @@ export default class PollController {
     async getpolls(req, res) {
         try {
             const { db } = await connectMongoDB()
-            const polls = await db.collection('polls').find().toArray()
+            const polls = await db.collection('polls').find({}).toArray()
 
             return res.status(200).json({ message: "list of polls found", polls, status: 200 })
 
@@ -37,16 +37,33 @@ export default class PollController {
     async getPollChoice(req, res) {
         try {
             const { id } = req.params
-            console.log(`ID: ${id}`)
             const { db } = await connectMongoDB()
-            console.log(`DB: ${db}`)
-            const choices = await db.collection('choices').find({ pollId: id }).toArray()
-            if (!choices) return res.status(404).json({ message: "Poll not found" })
-            console.log(`Choices: ${choices}`)
 
-            return res.status(200).json({ message: "Loaded Choices", choices, status: 200 })
+            const choices = await db.collection('choices').find({}).toArray()
+
+            console.log(choices)
+            if (!choices) return res.status(404).json({ message: "Poll not found" })
+            console.log(choices)
+
+            return res.status(200).json({ message: "Loaded Choices", choices: choices, status: 200 })
         } catch (e) {
             res.status(400).json({ message: "Error getting Choices of poll", status: 404, error: e })
+        }
+    }
+
+    async mostVotedChoice(req, res) {
+        let allChoices
+        try {
+            const { db } = await connectMongoDB()
+            const pollId = req.params.id
+            console.log(pollId)
+
+            allChoices = await db.collection('choices').find({pollId: new ObjectId(pollId) }).toArray()
+            console.log(allChoices)
+            return res.status(200).json({ message: allChoices })
+
+        } catch (error) {
+            res.status(400).json({ error, allChoices })
         }
     }
 }

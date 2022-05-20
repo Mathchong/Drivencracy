@@ -10,19 +10,21 @@ export default class ChoiceController {
             const id = body.pollId
 
             const poll = await db.collection("polls").findOne({ _id: new ObjectId(id) })
+            console.log(poll)
             if (!poll) return res.status(404).json({ message: "poll not found", status: 404 })
 
             const expired = dayjs().isAfter(dayjs(poll.expireAt))
             if (expired) return res.status(403).json({ message: "poll expired", status: 403 })
 
-            const choices = await db.collection("choices").find({ pollId: id }).toArray()
+            const choices = await db.collection("choices").find({ pollId: new ObjectId(id) }).toArray()
+            console.log(choices)
 
             for (let i = 0; i < choices.length; i++) {
                 if (choices[i].title === body.title)
                     return res.status(409).json({ message: "Choice title already exists", status: 409 })
             }
 
-            await db.collection('choices').insertOne({ title: body.title, pollId: body.pollId })
+            await db.collection('choices').insertOne({ title: body.title, pollId: new ObjectId(body.pollId) })
             return res.status(201).json({ message: "Choice added successfully", status: 201, body })
         } catch (e) {
             return res.status(400).json({ message: "Error during choice creation", error: e, status: 400 })
